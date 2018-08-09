@@ -233,7 +233,7 @@ class FlattenLayer(Layer):
 
     def set_output(self):
         self._output = \
-            self._prev_layer.output.flatten(2)  # flatten from the second dim
+            self._prev_layer.output.flatten(1)  # flatten from the second dim
 
 
 class DimShuffleLayer(Layer):

@@ -10,7 +10,7 @@ import logging
 import multiprocessing as mp
 
 # Theano
-import theano.sandbox.cuda
+import theano.gpuarray
 from lib.config import cfg, cfg_from_file, cfg_from_list
 from lib.test_net import test_net
 from lib.train_net import train_net

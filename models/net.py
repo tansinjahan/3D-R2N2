@@ -1,6 +1,6 @@
 import numpy as np
 import datetime as dt
-
+from random import randint
 # Theano
 import theano
 import theano.tensor as tensor
@@ -62,7 +62,7 @@ class Net(object):
         params_cpu = []
         for param in self.params:
             # params_cpu[param.name] = np.array(param.val.get_value())
-            params_cpu.append(param.val.get_value())
+            params_cpu.append(randint(0,param.val.get_value()))
         np.save(filename, params_cpu)
         print('saving network parameters to ' + filename)
 

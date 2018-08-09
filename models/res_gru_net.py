@@ -1,8 +1,12 @@
+from __future__ import absolute_import, print_function, division
 import numpy as np
 
 # Theano
 import theano
 import theano.tensor as tensor
+import tensorflow as tf
+
+
 
 from models.net import Net, tensor5
 from lib.layers import TensorProductLayer, ConvLayer, PoolLayer, Unpool3DLayer, \
@@ -54,11 +58,17 @@ class ResidualGRUNet(Net):
         conv5c = ConvLayer(pool4, (n_convfilter[4], 1, 1))
         pool5 = PoolLayer(conv5b)
 
+
         conv6a = ConvLayer(pool5, (n_convfilter[5], 3, 3))
         conv6b = ConvLayer(conv6a, (n_convfilter[5], 3, 3))
         pool6 = PoolLayer(conv6b)
 
+        #pool6.output_shape[1] = 0
+
         flat6 = FlattenLayer(pool6)
+
+        #flat6.output_shape[1] = 0
+
         fc7 = TensorProductLayer(flat6, n_fc_filters[0])
 
         # Set the size to be 256x4x4x4
@@ -159,7 +169,32 @@ class ResidualGRUNet(Net):
                            tensor.zeros_like(np.zeros(s_shape),
                                              dtype=theano.config.floatX)])
 
+        # -----changes applied-----------
+        # with tensor.S.Session()
+        #    pool5.output_shape[1] = 1
+
+        '''print("This is updated list function")
+        #theano.printing.pydotprint(s_update)
+        print(*s_update)
+        print(type(s_update[-2]))
+        temp = s_update[0]
+        #print(temp.eval())
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            print(sess.run(temp))
+        #pp(s_update.maker.fgraph.outputs[0])
+        #s_update[0]
+
+        #tensor.mul(s_update[-1], 3)
+        #s_update[0] = tensor.add(s_update[0], 5)
+        s_update[0] = theano.tensor.dot(s_update[0], 5)
+        print(tensor.maximum(s_update[0],s_update[1]))'''
+
+        #z1 = s_update
+
+        ###############################################
         update_all = s_update[-1]
+
         s_all = s_update[0]
         s_last = s_all[-1]
         gru_s = InputLayer(s_shape, s_last)

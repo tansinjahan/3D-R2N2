@@ -12,6 +12,8 @@ if (sys.version_info < (3, 0)):
 import shutil
 import numpy as np
 from subprocess import call
+import subprocess
+import time
 
 from PIL import Image
 from models import load_model
@@ -53,43 +55,46 @@ def load_demo_images2():
 def main():
     '''Main demo function'''
 
-    for i in range(2):
-        # Save prediction into a file named 'prediction.obj' or the given argument
-        pred_file_name = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
+    # Save prediction into a file named 'prediction.obj' or the given argument
+    pred_file_name1 = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
+    pred_file_name2 = sys.argv[2] if len(sys.argv) > 2 else 'pred.obj'
 
-        # load images
-        if i == 0:
-            demo_imgs = load_demo_images1()
-        else:
-            demo_imgs = load_demo_images2()
+    # load images
 
-        # Download and load pretrained weights
-        download_model(DEFAULT_WEIGHTS)
+    demo_imgs1 = load_demo_images1()
+    demo_imgs2 = load_demo_images2()
 
-        # Use the default network model
-        NetClass = load_model('ResidualGRUNet')
+    # Download and load pretrained weights
+    download_model(DEFAULT_WEIGHTS)
 
-        # Define a network and a solver. Solver provides a wrapper for the test function.
-        net = NetClass(compute_grad=False)  # instantiate a network
-        net.load(DEFAULT_WEIGHTS)                        # load downloaded weights
-        solver = Solver(net)                # instantiate a solver
+    # Use the default network model
+    NetClass = load_model('ResidualGRUNet')
 
-        # Run the network
-        voxel_prediction, _ = solver.test_output(demo_imgs)
+    # Define a network and a solver. Solver provides a wrapper for the test function.
+    net = NetClass(compute_grad=False)  # instantiate a network
+    net.load(DEFAULT_WEIGHTS)                        # load downloaded weights
+    solver = Solver(net)                # instantiate a solver
 
-        # Save the prediction to an OBJ file (mesh file).
-        voxel2obj(pred_file_name, voxel_prediction[0, :, 1, :, :] > cfg.TEST.VOXEL_THRESH)
+    # Run the network
+    voxel_prediction1, _ = solver.test_output(demo_imgs1)
+    voxel_prediction2, _ = solver.test_output(demo_imgs2)
+
+    # Save the prediction to an OBJ file (mesh file).
+    voxel2obj(pred_file_name1, voxel_prediction1[0, :, 1, :, :] > cfg.TEST.VOXEL_THRESH)
+    voxel2obj(pred_file_name2, voxel_prediction2[0, :, 1, :, :] > cfg.TEST.VOXEL_THRESH)
 
 
-
-        # Use meshlab or other mesh viewers to visualize the prediction.
-        # For Ubuntu>=14.04, you can install meshlab using
-        # `sudo apt-get install meshlab`
-        if cmd_exists('meshlab'):
-            call(['meshlab', pred_file_name])
-        else:
-            print('Meshlab not found: please use visualization of your choice to view %s' %
-                  pred_file_name)
+    # Use meshlab or other mesh viewers to visualize the prediction.
+    # For Ubuntu>=14.04, you can install meshlab using
+    # `sudo apt-get install meshlab`
+    if cmd_exists('meshlab'):
+        proc1 = subprocess.Popen(['meshlab', pred_file_name1])
+        #subprocess.Popen.kill(proc1)
+        time.sleep(2.0)
+        proc2 = subprocess.Popen(['meshlab', pred_file_name2])
+        #subprocess.Popen.kill(proc2)
+    else:
+        print('Meshlab not found: please use visualization of your choice to view %s' %pred_file_name1)
 
 
 if __name__ == '__main__':

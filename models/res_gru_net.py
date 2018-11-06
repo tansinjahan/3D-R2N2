@@ -179,24 +179,34 @@ class ResidualGRUNet(Net):
         print(type(s_update[-2]))
         temp = s_update[0]
         #print(temp.eval())
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            print(sess.run(temp))
+       
         #pp(s_update.maker.fgraph.outputs[0])
         #s_update[0]
 
         #tensor.mul(s_update[-1], 3)
-        #s_update[0] = tensor.add(s_update[0], 5)
-        s_update[0] = theano.tensor.dot(s_update[0], 5)
+        
         print(tensor.maximum(s_update[0],s_update[1]))'''
 
-        #z1 = s_update
+        z1 = s_update
+        print("This is z1", z1[0])
+
+        z1 = theano.tensor.dot(z1[0], 5)
+
+
+        temp = theano.tensor.dot(s_update[0], 5)
 
         ###############################################
-        update_all = s_update[-1]
 
-        s_all = s_update[0]
+
+        #z2 = theano.tensor.stack([z1[0],temp[0]],2)
+        update_all = z1[-1]
+        print("This is update_all", update_all)
+        s_all = z1[0]
         s_last = s_all[-1]
+        print("This is s_last shape", type(s_last))
+        #print("This is the value of s_last:", s_last.eval())
+        #print(s_last.eval(-1))
+
         gru_s = InputLayer(s_shape, s_last)
         unpool7 = Unpool3DLayer(gru_s)
         conv7a = Conv3DLayer(unpool7, (n_deconvfilter[1], 3, 3, 3))
@@ -236,4 +246,6 @@ class ResidualGRUNet(Net):
         self.error = softmax_loss.error(self.y)
         self.params = get_trainable_params()
         self.output = softmax_loss.prediction()
+
+        update_all = theano.tensor.dot(update_all[0], 5)
         self.activations = [update_all]
